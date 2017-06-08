@@ -1,3 +1,10 @@
-WwoJewoJCSJtb2R1bGUiOiAiZGlybGlzdGVyIiwKCQkiaXNBY3RpdmUiOiBm
-YWxzZQoJfSwKCXsKCQkibW9kdWxlIjogImVudmlyb25tZW50IiwKCQkiaXNB
-Y3RpdmUiOiBmYWxzZQoJfQpdCg==
+[
+	{
+		"module": "dirlister",
+		"isActive": false
+	},
+	{
+		"module": "environment",
+		"isActive": true
+	}
+]
