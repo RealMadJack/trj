@@ -1,7 +1,7 @@
 [
 	{
 		"module": "dirlister",
-		"isActive": false
+		"isActive": true
 	},
 	{
 		"module": "environment",
