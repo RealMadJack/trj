@@ -127,5 +127,10 @@ while True:
 			t.start()
 			time.sleep(random.randint(1, 10))
 
+	print(" ")
+	print("[*] Pulling from remote repository!")
 	gl.pull('origin', 'master')
+
+	print(" ")
+	print("[*] Setting timer.")
 	time.sleep(random.randint(1000, 10000))
