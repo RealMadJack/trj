@@ -1,10 +1,1 @@
-[
-	{
-		"module": "dirlister",
-		"isActive": true
-	},
-	{
-		"module": "environment",
-		"isActive": true
-	}
-]
+[{"module": "dirlister", "isActive": false}, {"module": "environment", "isActive": true}]
