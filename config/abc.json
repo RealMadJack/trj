@@ -1,8 +1,10 @@
 [
 	{
-		"module": "dirlister"
+		"module": "dirlister",
+		"isActive": false
 	},
 	{
-		"module": "environment"
+		"module": "environment",
+		"isActive": true
 	}
 ]
