@@ -5,6 +5,6 @@
 	},
 	{
 		"module": "environment",
-		"isActive": true
+		"isActive": false
 	}
 ]
