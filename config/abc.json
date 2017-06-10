@@ -5,6 +5,10 @@
 	},
 	{
 		"module": "environment",
-		"isActive": true
+		"isActive": false
+	},
+	{
+		module: whichnotjson,
+		"isActive", true
 	}
 ]
