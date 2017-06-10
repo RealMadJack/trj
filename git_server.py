@@ -54,7 +54,7 @@ def get_file_contents(filepath, f=None):
 
 		# find filepath in tree object
 		if filepath in filename.path:
-			print("[*] Found file {0}".format(filepath))
+			print("[*] Found remote file {0}".format(filepath))
 			blob = repo.blob(filename._json_data['sha'])
 
 			if f == 'b':
@@ -65,7 +65,7 @@ def get_file_contents(filepath, f=None):
 	return None
 
 
-def compare_remote_config():
+def compare_remote_config(config_path):
 	"""
 		Compares github config with local.
 		Updates corrupted, deleted data.
@@ -73,21 +73,21 @@ def compare_remote_config():
 		TODO:
 	"""
 
-	local_config = open(trojan_config_path)
+	local_config = open(config_path)
 	local_config = json.load(local_config)
 
 	local_config_json = json.dumps(local_config)
-	local_config_byte = "{0}".format(local_config_json).encode()
+	local_config_byte = "{0}".format(local_config).encode()
 
-	remote_blob = get_file_contents(trojan_config_path, 'b')
+	remote_blob = get_file_contents(config_path, 'b')
 
 	if not remote_blob:
-		print("[!] Can't find the file!")
+		print("[!] Can't find config file!")
 
 		gh, repo, branch = connect_to_github()
 
 		print("[+] Creating config file...")
-		repo.create_file(trojan_config_path, "Deleted config file auto update", local_config_byte)
+		repo.create_file(config_path, "Deleted config file auto update", local_config_byte)
 		print('[=] Exiting')
 
 		return None
@@ -102,7 +102,7 @@ def compare_remote_config():
 		remote_sha = remote_blob.sha
 
 		print("[+] Updating corrupted config file...")
-		repo.update_file(trojan_config_path, "Corrupted config file auto update.", local_config_byte, remote_sha)
+		repo.update_file(config_path, "Corrupted config file auto update.", local_config_byte, remote_sha)
 		print("[=] Exiting")
 
 		return None
@@ -112,7 +112,7 @@ def compare_remote_config():
 
 		remote_sha = remote_blob.sha
 
-		print('[+] Updating config file...')
+		print('[+] Updating remote config file...')
 		repo.update_file(trojan_config_path, "Config file auto update.", local_config_byte, remote_sha)
 		print("[=] Exiting.")
 
@@ -132,12 +132,11 @@ def pull_remote_data(reponame, branch):
 		git_local.pull(reponame, branch)
 	except:
 		print("Unexpected error in %s:" % inspect.stack()[0][3], sys.exc_info()[0])
-		raise
 
 	return None
 
 
-def clean_remote_data(pathname):
+def clean_remote_data(data_path):
 	"""
 		Cleans remote data after pull.
 
@@ -151,7 +150,7 @@ def clean_remote_data(pathname):
 	#pull_remote_data(u_reposerver, u_branch)
 
 	for datafile in tree.tree:
-		if pathname in datafile.path:
+		if data_path in datafile.path:
 
 			datafile_blob = repo.blob(datafile._json_data['sha'])
 
@@ -160,10 +159,9 @@ def clean_remote_data(pathname):
 				#repo.delete_file(datafile.path, 'Data files auto delete', datafile_blob.sha)
 			except:
 				print("Unexpected error in %s:" % inspect.stack()[0][3], sys.exc_info()[0])
-				raise
 
 
-	print("[=] Exiting. No new files in %s" % pathname)
+	print("[=] Exiting. No new files in %s" % data_path)
 	return None
 #clean_remote_data(trojan_data_path)
 
@@ -191,13 +189,17 @@ def merge_local_data():
 
 
 # server main loop
-
 while True:
 
-	if task_queue.empty():
-		print("")
+	try:
+		if task_queue.empty():
+			print("")
 
-		compare_remote_config()
-		clean_remote_data(trojan_data_path)
+			compare_remote_config(trojan_config_path)
+			clean_remote_data(trojan_data_path)
 
-	time.sleep(random.randint(1000, 5000))
+		time.sleep(random.randint(1000, 5000))
+	except KeyboardInterrupt:
+		print('Server loop finished.')
+		sys.exit(0)
+
